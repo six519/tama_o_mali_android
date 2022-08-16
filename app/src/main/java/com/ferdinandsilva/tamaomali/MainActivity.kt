@@ -39,6 +39,7 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
     private var wrong: Int = 0
     private var pressButton: ImageView? = null
     private var menuLayout: ConstraintLayout? = null
+    private var gameLayout: ConstraintLayout? = null
 
     private val cameraLoaderCallBack = object : BaseLoaderCallback(this) {
         override fun onManagerConnected(status: Int) {
@@ -112,10 +113,13 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
         cameraView!!.setCvCameraViewListener(this)
 
         menuLayout = findViewById(R.id.menu_layout)
+        gameLayout = findViewById(R.id.game_layout)
+        gameLayout?.visibility = View.GONE
 
         pressButton = findViewById(R.id.press_button)
         pressButton?.setOnClickListener(View.OnClickListener { view ->
             menuLayout?.visibility = View.GONE
+            gameLayout?.visibility = View.VISIBLE
         })
     }
 
