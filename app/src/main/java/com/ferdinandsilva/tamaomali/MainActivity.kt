@@ -15,6 +15,7 @@ import android.view.SurfaceView
 import android.view.View
 import android.view.WindowManager
 import android.widget.ImageView
+import android.widget.TextView
 import android.widget.Toast
 import androidx.constraintlayout.widget.ConstraintLayout
 import org.opencv.android.*
@@ -24,6 +25,7 @@ import org.opencv.core.MatOfRect
 import org.opencv.core.Size
 import org.opencv.objdetect.CascadeClassifier
 import org.opencv.objdetect.Objdetect
+import org.w3c.dom.Text
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
@@ -40,6 +42,10 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
     private var pressButton: ImageView? = null
     private var menuLayout: ConstraintLayout? = null
     private var gameLayout: ConstraintLayout? = null
+    private var rightCountNum: Int = 0
+    private var wrongCountNum: Int = 0
+    private var rightCount: TextView? = null
+    private var wrongCount: TextView? = null
 
     private val cameraLoaderCallBack = object : BaseLoaderCallback(this) {
         override fun onManagerConnected(status: Int) {
@@ -115,6 +121,9 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
         menuLayout = findViewById(R.id.menu_layout)
         gameLayout = findViewById(R.id.game_layout)
         gameLayout?.visibility = View.GONE
+
+        rightCount = findViewById(R.id.right_count)
+        wrongCount = findViewById(R.id.wrong_count)
 
         pressButton = findViewById(R.id.press_button)
         pressButton?.setOnClickListener(View.OnClickListener { view ->
@@ -200,6 +209,11 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
             //Toast.makeText(applicationContext, "ALRIGHT", Toast.LENGTH_LONG).show()
             //Log.e(TAG, "HELLO")
             Log.e(TAG, "The length is: " + matOfRect.toArray().size)
+        }
+
+        runOnUiThread {
+            rightCount?.text = "Tamang Sagot: ${rightCountNum}"
+            wrongCount?.text = "Maling Sagot: ${wrongCountNum}"
         }
 
         return cam!!
