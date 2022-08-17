@@ -47,6 +47,17 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
     private var rightCount: TextView? = null
     private var wrongCount: TextView? = null
     private var question: TextView? = null
+    private var initialFaceX: Int = 0
+    private var lastMove: Int = 0
+
+    enum class GameState {
+        GET_FACE,
+        GET_QUESTION,
+        SHOW_QUESTION,
+        SHOW_ANSWER
+    }
+
+    private var currentGameState: GameState = GameState.GET_FACE
 
     private val cameraLoaderCallBack = object : BaseLoaderCallback(this) {
         override fun onManagerConnected(status: Int) {
@@ -213,11 +224,13 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
         var matOfRect: MatOfRect = MatOfRect();
 
         cascadeClassifier?.detectMultiScale(cam, matOfRect, 1.1, 4, Objdetect.CASCADE_SCALE_IMAGE, Size(20.0, 20.0))
-        //cascadeClassifier?.detectMultiScale(cam, matOfRect)
+
         for(mor in matOfRect.toArray()) {
-            //Toast.makeText(applicationContext, "ALRIGHT", Toast.LENGTH_LONG).show()
-            //Log.e(TAG, "HELLO")
-            Log.e(TAG, "The length is: " + matOfRect.toArray().size)
+            if (currentGameState == GameState.GET_FACE) {
+                initialFaceX = mor.x
+                currentGameState = GameState.GET_QUESTION
+                break
+            }
         }
 
         runOnUiThread {
