@@ -50,16 +50,22 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
     private var question: TextView? = null
     private var initialFaceX: Int = 0
     private var lastMove: Int = 0
+    private var fromMove: Int = 0
     private var currentQuestion: Int = 0
+    private var isCorrect: Boolean = false
+    private var tamaButton: ImageView? = null
+    private var maliButton: ImageView? = null
+    private var showQuestionCounter: Int = 0
 
     enum class GameState {
+        NONE,
         GET_FACE,
         GET_QUESTION,
         SHOW_QUESTION,
         SHOW_ANSWER
     }
 
-    private var currentGameState: GameState = GameState.GET_FACE
+    private var currentGameState: GameState = GameState.NONE
 
     private val cameraLoaderCallBack = object : BaseLoaderCallback(this) {
         override fun onManagerConnected(status: Int) {
@@ -146,6 +152,9 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
         rightCount = findViewById(R.id.right_count)
         wrongCount = findViewById(R.id.wrong_count)
 
+        tamaButton = findViewById(R.id.tama_button)
+        maliButton = findViewById(R.id.mali_button)
+
         question = findViewById(R.id.question)
         question?.text = ""
 
@@ -153,6 +162,7 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
         pressButton?.setOnClickListener(View.OnClickListener { view ->
             menuLayout?.visibility = View.GONE
             gameLayout?.visibility = View.VISIBLE
+            currentGameState = GameState.GET_FACE
         })
     }
 
@@ -215,6 +225,19 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
     override fun onCameraViewStopped() {
     }
 
+    private fun showAnswer() {
+        currentGameState = GameState.SHOW_ANSWER
+        fromMove = lastMove
+
+        if (isCorrect) {
+            rightCountNum += 1
+            pool!!.play(right, 1.0f, 1.0f, 1, 0, 1.0f)
+        } else {
+            wrongCountNum += 1
+            pool!!.play(wrong, 1.0f, 1.0f, 1, 0, 1.0f)
+        }
+    }
+
     override fun onCameraFrame(frame: CameraBridgeViewBase.CvCameraViewFrame): Mat {
 
         if (cam != null) {
@@ -245,39 +268,67 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
                 break
             }
 
-            if (currentGameState != GameState.GET_FACE) {
+            if (currentGameState != GameState.GET_FACE && currentGameState != GameState.NONE) {
 
                 if (mor.x < (initialFaceX - 300) && lastMove != 1) {
                     //left
-                    showToast("left")
                     lastMove = 1
 
                     if (currentGameState == GameState.SHOW_QUESTION) {
-
+                        isCorrect = Question.questions[currentQuestion].a
+                        showAnswer()
                     }
-
                     break
                 }
 
                 if (mor.x > (initialFaceX + 300) && lastMove != 2) {
                     //right
-                    showToast("right")
                     lastMove = 2
+
+                    if (currentGameState == GameState.SHOW_QUESTION) {
+                        isCorrect = !Question.questions[currentQuestion].a
+                        showAnswer()
+                    }
                     break
                 }
 
                 if (mor.x >= (initialFaceX - 95) && mor.x <= (initialFaceX + 95) && lastMove != 0) {
                     //back
-                    showToast("back")
                     lastMove = 0
                     break
                 }
-
             }
-
         }
 
         runOnUiThread {
+
+            if(currentGameState == GameState.SHOW_ANSWER) {
+
+                if (showQuestionCounter == SHOW_QUESTION_COUNTER) {
+                    currentGameState = GameState.GET_QUESTION
+                    showQuestionCounter = 0
+                }
+
+                if (fromMove == 1) {
+                    //left
+                    if(isCorrect) {
+                        tamaButton?.setImageResource(R.drawable.tama_green)
+                    } else {
+                        tamaButton?.setImageResource(R.drawable.tama_red)
+                    }
+                } else {
+                    //right
+                    if(isCorrect) {
+                        maliButton?.setImageResource(R.drawable.mali_green)
+                    } else {
+                        maliButton?.setImageResource(R.drawable.mali_red)
+                    }
+                }
+                showQuestionCounter += 1
+            } else {
+                tamaButton?.setImageResource(R.drawable.tama_orange)
+                maliButton?.setImageResource(R.drawable.mali_orange)
+            }
 
             if (currentGameState == GameState.SHOW_QUESTION || currentGameState == GameState.SHOW_ANSWER) {
                 //show text
@@ -298,5 +349,6 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
 
         private const val TAG = "MainActivity"
         private const val CAMERA_PERMISSION_REQUEST = 1
+        private const val SHOW_QUESTION_COUNTER = 8
     }
 }
