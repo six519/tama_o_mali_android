@@ -257,9 +257,8 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
         cascadeClassifier?.detectMultiScale(cam, matOfRect, 1.1, 4, Objdetect.CASCADE_SCALE_IMAGE, Size(20.0, 20.0))
 
         if (currentGameState == GameState.GET_QUESTION) {
-            //currentQuestion = Random.nextInt(0, Question.questions.size - 1)
+            //currentQuestion = Random(0).nextInt(0, Question.questions.size - 1)
             currentQuestion = ((Math.random() * (Question.questions.size - 1)) + 0).toInt()
-            showToast("The currentQuestion is: ${currentQuestion}")
             currentGameState = GameState.SHOW_QUESTION
         }
 
