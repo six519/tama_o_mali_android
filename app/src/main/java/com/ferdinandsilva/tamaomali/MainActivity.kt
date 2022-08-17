@@ -46,6 +46,7 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
     private var wrongCountNum: Int = 0
     private var rightCount: TextView? = null
     private var wrongCount: TextView? = null
+    private var question: TextView? = null
 
     private val cameraLoaderCallBack = object : BaseLoaderCallback(this) {
         override fun onManagerConnected(status: Int) {
@@ -124,6 +125,9 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
 
         rightCount = findViewById(R.id.right_count)
         wrongCount = findViewById(R.id.wrong_count)
+
+        question = findViewById(R.id.question)
+        question?.text = ""
 
         pressButton = findViewById(R.id.press_button)
         pressButton?.setOnClickListener(View.OnClickListener { view ->
