@@ -29,6 +29,7 @@ import org.w3c.dom.Text
 import java.io.File
 import java.io.FileOutputStream
 import java.io.InputStream
+import kotlin.random.Random
 
 class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListener2 {
     private var cameraView: CameraBridgeViewBase? = null
@@ -49,6 +50,7 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
     private var question: TextView? = null
     private var initialFaceX: Int = 0
     private var lastMove: Int = 0
+    private var currentQuestion: Int = 0
 
     enum class GameState {
         GET_FACE,
@@ -110,6 +112,12 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
                     super.onManagerConnected(status)
                 }
             }
+        }
+    }
+
+    fun showToast(message: String) {
+        runOnUiThread {
+            Toast.makeText(applicationContext, message, Toast.LENGTH_LONG).show()
         }
     }
 
@@ -225,15 +233,60 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
 
         cascadeClassifier?.detectMultiScale(cam, matOfRect, 1.1, 4, Objdetect.CASCADE_SCALE_IMAGE, Size(20.0, 20.0))
 
+        if (currentGameState == GameState.GET_QUESTION) {
+            currentQuestion = Random.nextInt(0, Question.questions.size - 1)
+            currentGameState = GameState.SHOW_QUESTION
+        }
+
         for(mor in matOfRect.toArray()) {
             if (currentGameState == GameState.GET_FACE) {
                 initialFaceX = mor.x
                 currentGameState = GameState.GET_QUESTION
                 break
             }
+
+            if (currentGameState != GameState.GET_FACE) {
+
+                if (mor.x < (initialFaceX - 300) && lastMove != 1) {
+                    //left
+                    showToast("left")
+                    lastMove = 1
+
+                    if (currentGameState == GameState.SHOW_QUESTION) {
+
+                    }
+
+                    break
+                }
+
+                if (mor.x > (initialFaceX + 300) && lastMove != 2) {
+                    //right
+                    showToast("right")
+                    lastMove = 2
+                    break
+                }
+
+                if (mor.x >= (initialFaceX - 95) && mor.x <= (initialFaceX + 95) && lastMove != 0) {
+                    //back
+                    showToast("back")
+                    lastMove = 0
+                    break
+                }
+
+            }
+
         }
 
         runOnUiThread {
+
+            if (currentGameState == GameState.SHOW_QUESTION || currentGameState == GameState.SHOW_ANSWER) {
+                //show text
+                question?.text = Question.questions[currentQuestion].q
+            } else {
+                //dont show
+                question?.text = ""
+            }
+
             rightCount?.text = "Tamang Sagot: ${rightCountNum}"
             wrongCount?.text = "Maling Sagot: ${wrongCountNum}"
         }
