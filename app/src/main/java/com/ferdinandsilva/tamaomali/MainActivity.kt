@@ -93,6 +93,7 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
                     right =  pool!!.load(applicationContext, R.raw.tama, 1)
                     wrong = pool!!.load(applicationContext, R.raw.mali, 1)
                     //pool!!.play(right, 1.0f, 1.0f, 1, 0, 1.0f) //to play sound
+                    mediaPlayer?.start()
                 }
                 else -> {
                     super.onManagerConnected(status)
@@ -166,7 +167,6 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
 
     override fun onResume() {
         super.onResume()
-        mediaPlayer?.start()
         if (!OpenCVLoader.initDebug()) {
             Log.d(TAG, "Internal OpenCV library not found. Using OpenCV Manager for initialization")
             OpenCVLoader.initAsync(OpenCVLoader.OPENCV_VERSION, this, cameraLoaderCallBack)
@@ -176,9 +176,14 @@ class MainActivity : AppCompatActivity(), CameraBridgeViewBase.CvCameraViewListe
         }
     }
 
+    override fun onStop() {
+        super.onStop()
+        mediaPlayer?.stop()
+        finish()
+    }
+
     override fun onDestroy() {
         super.onDestroy()
-        mediaPlayer?.stop()
         if (cameraView != null)
             cameraView!!.disableView()
     }
